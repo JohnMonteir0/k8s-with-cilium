@@ -1,0 +1,9 @@
+eni:
+  enabled: true
+ipam:
+  mode: eni
+egressMasqueradeInterfaces: eth+
+routingMode: native
+kubeProxyReplacement: true
+k8sServiceHost: "${k8s_service_host}"
+k8sServicePort: 443
