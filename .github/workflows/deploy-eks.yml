@@ -5,7 +5,7 @@ on:
     branches: [main]
 
 env:
-  TF_WORKING_DIR: terraform
+  TF_WORKING_DIR: .
   AWS_REGION: us-east-1
 
 permissions:
