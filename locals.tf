@@ -11,3 +11,27 @@ locals {
     GithubOrg  = "terraform-aws-modules"
   }
 }
+
+locals {
+  eks_node_groups = var.enable_node_groups ? {
+    cilium-cluster = {
+      ami_type       = "BOTTLEROCKET_x86_64"
+      instance_types = ["t3.medium"]
+
+      min_size     = 2
+      max_size     = 5
+      desired_size = 2
+
+      bootstrap_extra_args = <<-EOT
+        [settings.host-containers.admin]
+        enabled = false
+
+        [settings.host-containers.control]
+        enabled = true
+
+        [settings.kernel]
+        lockdown = "integrity"
+      EOT
+    }
+  } : {}
+}

@@ -1,0 +1,10 @@
+controller:
+  serviceAccount:
+    create: false
+    name: ebs-csi-controller-sa
+    annotations:
+      eks.amazonaws.com/role-arn: "${role_arn}"
+
+enableVolumeScheduling: true
+enableVolumeResizing: true
+enableVolumeSnapshot: true

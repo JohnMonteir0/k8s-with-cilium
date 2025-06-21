@@ -8,46 +8,17 @@ module "eks_bottlerocket" {
   cluster_endpoint_public_access           = true
   enable_cluster_creator_admin_permissions = true
 
- # EKS Addons
+  # EKS Addons
   cluster_addons = {
-    coredns                = {}
-#     eks-pod-identity-agent = {}
-#     kube-proxy             = {}
-#     vpc-cni                = {}
+    coredns = {}
+    #     eks-pod-identity-agent = {}
+    #     kube-proxy             = {}
+    #     vpc-cni                = {}
   }
 
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
 
-  eks_managed_node_groups = {
-    backstage = {
-      ami_type       = "BOTTLEROCKET_x86_64"
-      instance_types = ["t3.medium"]
-
-      min_size     = 2
-      max_size     = 5
-      desired_size = 2
-
-      # This is not required - demonstrates how to pass additional configuration
-      # Ref https://bottlerocket.dev/en/os/1.19.x/api/settings/
-      bootstrap_extra_args = <<-EOT
-        # The admin host container provides SSH access and runs with "superpowers".
-        # It is disabled by default, but can be disabled explicitly.
-        [settings.host-containers.admin]
-        enabled = false
-
-        # The control host container provides out-of-band access via SSM.
-        # It is enabled by default, and can be disabled if you do not expect to use SSM.
-        # This could leave you with no way to access the API and change settings on an existing node!
-        [settings.host-containers.control]
-        enabled = true
-
-        # extra args added
-        [settings.kernel]
-        lockdown = "integrity"
-      EOT
-    }
-  }
-
-  tags = local.tags
+ eks_managed_node_groups = local.eks_node_groups
+ 
 }
