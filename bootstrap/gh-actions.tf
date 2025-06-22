@@ -46,126 +46,38 @@ resource "aws_iam_role" "gh_actions_role" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "eks_policy" {
-  role       = aws_iam_role.gh_actions_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
-}
-
-resource "aws_iam_role_policy_attachment" "ecr_policy" {
-  role       = aws_iam_role.gh_actions_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess"
-}
-
-resource "aws_iam_role_policy_attachment" "iam_policy" {
-  role       = aws_iam_role.gh_actions_role.name
-  policy_arn = "arn:aws:iam::aws:policy/IAMFullAccess"
-}
-
-### Remote Backend Permissions ###
-resource "aws_iam_policy" "github_actions_tf_backend" {
-  name = "github-actions-tf-backend-access"
+resource "aws_iam_policy" "github_actions_combined" {
+  name = "github-actions-combined"
 
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
       {
-        Sid    = "AllowS3TerraformBackendAccess"
-        Effect = "Allow"
+        Sid    = "AllowS3TerraformBackendAccess",
+        Effect = "Allow",
         Action = [
           "s3:GetObject",
           "s3:PutObject",
           "s3:DeleteObject",
           "s3:ListBucket"
-        ]
+        ],
         Resource = [
           "arn:aws:s3:::terraform-backend-terraformbackends3bucket-cicagxwrw0p9",
           "arn:aws:s3:::terraform-backend-terraformbackends3bucket-cicagxwrw0p9/*"
         ]
       },
       {
-        Sid    = "AllowDynamoDBTerraformLocking"
-        Effect = "Allow"
+        Sid    = "AllowDynamoDBTerraformLocking",
+        Effect = "Allow",
         Action = [
           "dynamodb:GetItem",
           "dynamodb:PutItem",
           "dynamodb:DeleteItem",
           "dynamodb:Scan",
           "dynamodb:UpdateItem"
-        ]
+        ],
         Resource = "arn:aws:dynamodb:us-east-1:058264076061:table/terraform-backend-TerraformBackendDynamoDBTable-1MACMF7VC44EU"
-      }
-    ]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "github_actions_tf_backend" {
-  role       = aws_iam_role.gh_actions_role.name
-  policy_arn = aws_iam_policy.github_actions_tf_backend.arn
-}
-
-### KMS Key (inline policy only) ###
-resource "aws_kms_key" "terraform_backend" {
-  description         = "KMS key for Terraform backend"
-  enable_key_rotation = true
-
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Sid    = "AllowRootFullAccess",
-        Effect = "Allow",
-        Principal = {
-          AWS = "arn:aws:iam::058264076061:root"
-        },
-        Action   = "kms:*",
-        Resource = "*"
       },
-      {
-        Sid    = "AllowGitHubActionsRoleAccess",
-        Effect = "Allow",
-        Principal = {
-          AWS = "arn:aws:iam::058264076061:role/gh-actions-role"
-        },
-        Action = [
-          "kms:Decrypt",
-          "kms:Encrypt",
-          "kms:DescribeKey",
-          "kms:GenerateDataKey*"
-        ],
-        Resource = "*",
-        Condition = {
-          StringLikeIfExists = {
-            "aws:userid" : "AROA*:*"  # covers assumed role sessions
-          }
-        }
-      },
-      {
-        Sid       = "AllowDynamoDBServiceUsage",
-        Effect    = "Allow",
-        Principal = "*",
-        Action = [
-          "kms:Decrypt",
-          "kms:GenerateDataKey*"
-        ],
-        Resource = "*",
-        Condition = {
-          StringEquals = {
-            "kms:CallerAccount" = "058264076061",
-            "kms:ViaService"    = "dynamodb.us-east-1.amazonaws.com"
-          }
-        }
-      }
-    ]
-  })
-}
-
-### EC2 Permission ###
-resource "aws_iam_policy" "github_actions_extra_permissions" {
-  name = "github-actions-extra-permissions"
-
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
       {
         Sid    = "AllowKmsActions",
         Effect = "Allow",
@@ -195,15 +107,44 @@ resource "aws_iam_policy" "github_actions_extra_permissions" {
           "ec2:DescribeVpcAttribute"
         ],
         Resource = "*"
+      },
+      {
+        Sid    = "AllowEKSClusterCreateAndManage",
+        Effect = "Allow",
+        Action = [
+          "eks:CreateCluster",
+          "eks:DescribeCluster",
+          "eks:ListClusters",
+          "eks:DeleteCluster",
+          "eks:TagResource",
+          "eks:UntagResource",
+          "eks:UpdateClusterVersion",
+          "eks:UpdateClusterConfig"
+        ],
+        Resource = "*"
       }
     ]
   })
 }
 
-
-resource "aws_iam_role_policy_attachment" "github_actions_extra_permissions" {
+resource "aws_iam_role_policy_attachment" "github_actions_combined" {
   role       = aws_iam_role.gh_actions_role.name
-  policy_arn = aws_iam_policy.github_actions_extra_permissions.arn
+  policy_arn = aws_iam_policy.github_actions_combined.arn
+}
+
+resource "aws_iam_role_policy_attachment" "eks_policy" {
+  role       = aws_iam_role.gh_actions_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+}
+
+resource "aws_iam_role_policy_attachment" "ecr_policy" {
+  role       = aws_iam_role.gh_actions_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess"
+}
+
+resource "aws_iam_role_policy_attachment" "iam_policy" {
+  role       = aws_iam_role.gh_actions_role.name
+  policy_arn = "arn:aws:iam::aws:policy/IAMFullAccess"
 }
 
 resource "aws_iam_role_policy_attachment" "eks_managed" {
@@ -221,11 +162,6 @@ resource "aws_iam_role_policy_attachment" "eks_vpc" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonVPCFullAccess"
 }
 
-resource "aws_iam_role_policy_attachment" "iam_full" {
-  role       = aws_iam_role.gh_actions_role.name
-  policy_arn = "arn:aws:iam::aws:policy/IAMFullAccess"
-}
-
 resource "aws_iam_role_policy_attachment" "kms" {
   role       = aws_iam_role.gh_actions_role.name
   policy_arn = "arn:aws:iam::aws:policy/AWSKeyManagementServicePowerUser"
@@ -240,11 +176,3 @@ resource "aws_iam_role_policy_attachment" "dynamodb_backend" {
   role       = aws_iam_role.gh_actions_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
 }
-
-
-
-
-
-
-
-
