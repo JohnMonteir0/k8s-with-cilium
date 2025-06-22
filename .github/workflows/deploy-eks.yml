@@ -17,28 +17,41 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout source code
+      ######################################################
+      # STEP 0 - Checkout source code
+      ######################################################
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      # 2. Configure AWS credentials using GitHub OIDC
+      ######################################################
+      # STEP 1 - Authenticate to AWS using GitHub OIDC
+      ######################################################
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: ${{ secrets.GHA_ASSUME_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # 3. Optional: Set up GitHub auth for private module pull
+      ######################################################
+      # STEP 2 - Configure Git for private module access
+      ######################################################
       - name: Configure Git credentials
         run: |
           git config --global url."https://${{ secrets.GH_TOKEN }}@github.com/".insteadOf "https://github.com/"
 
-      # 4. Install Terraform
+      ######################################################
+      # STEP 3 - Install Terraform CLI
+      ######################################################
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      # 5. Terraform Init
+      ######################################################
+      # STEP 4 - Initialize Terraform working directory
+      ######################################################
       - name: Terraform Init
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform init
 
+      ######################################################
+      # STEP 5 - Create EKS Cluster (no node groups, no addons)
+      #####
