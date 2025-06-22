@@ -103,4 +103,37 @@ resource "aws_iam_role_policy_attachment" "github_actions_tf_backend" {
   policy_arn = aws_iam_policy.github_actions_tf_backend.arn
 }
 
+### KMS Permission ###
+resource "aws_kms_key" "terraform_backend" {
+  description         = "KMS key for Terraform backend"
+  enable_key_rotation = true
+  policy              = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Sid    = "AllowAccountAdminsFullAccess",
+        Effect = "Allow",
+        Principal = {
+          AWS = "arn:aws:iam::851725188350:root"
+        },
+        Action   = "kms:*",
+        Resource = "*"
+      },
+      {
+        Sid = "AllowGitHubActionsRoleDecrypt",
+        Effect = "Allow",
+        Principal = {
+          AWS = "arn:aws:iam::851725188350:role/gh-actions-role"
+        },
+        Action = [
+          "kms:Decrypt",
+          "kms:Encrypt",
+          "kms:DescribeKey",
+          "kms:GenerateDataKey*"
+        ],
+        Resource = "*"
+      }
+    ]
+  })
+}
 
