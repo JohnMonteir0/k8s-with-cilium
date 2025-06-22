@@ -159,6 +159,52 @@ resource "aws_kms_key" "terraform_backend" {
   })
 }
 
+### EC2 Permission ###
+resource "aws_iam_policy" "github_actions_extra_permissions" {
+  name = "github-actions-extra-permissions"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Sid    = "AllowKMSTagResource",
+        Effect = "Allow",
+        Action = [
+          "kms:TagResource"
+        ],
+        Resource = "*"
+      },
+      {
+        Sid    = "AllowEC2Provisioning",
+        Effect = "Allow",
+        Action = [
+          "ec2:CreateVpc",
+          "ec2:DescribeVpcs",
+          "ec2:CreateTags",
+          "ec2:CreateSubnet",
+          "ec2:DescribeSubnets",
+          "ec2:CreateInternetGateway",
+          "ec2:AttachInternetGateway",
+          "ec2:CreateRouteTable",
+          "ec2:CreateRoute",
+          "ec2:AssociateRouteTable",
+          "ec2:ModifyVpcAttribute",
+          "ec2:DescribeRouteTables",
+          "ec2:DescribeInternetGateways",
+          "ec2:AuthorizeSecurityGroupIngress",
+          "ec2:AuthorizeSecurityGroupEgress",
+          "ec2:DescribeSecurityGroups"
+        ],
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "github_actions_extra_permissions" {
+  role       = aws_iam_role.gh_actions_role.name
+  policy_arn = aws_iam_policy.github_actions_extra_permissions.arn
+}
 
 
 
