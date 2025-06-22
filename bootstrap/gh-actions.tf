@@ -137,3 +137,8 @@ resource "aws_kms_key" "terraform_backend" {
   })
 }
 
+resource "aws_iam_role_policy_attachment" "terraform_backend" {
+  role       = aws_iam_role.gh_actions_role.name
+  policy_arn = aws_iam_policy.terraform_backend.arn
+}
+
