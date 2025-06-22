@@ -23,7 +23,7 @@ jobs:
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/gh-actions-role
+          role-to-assume: ${{ secrets.GHA_ASSUME_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Configure Git credentials
