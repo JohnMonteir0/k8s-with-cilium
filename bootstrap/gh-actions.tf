@@ -45,3 +45,8 @@ resource "aws_iam_role" "gh_actions_role" {
     ]
   })
 }
+
+resource "aws_iam_role_policy_attachment" "gh_actions_admin_policy" {
+  role       = aws_iam_role.gh_actions_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
+} 
