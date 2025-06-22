@@ -1,0 +1,9 @@
+isClusterService: true
+replicaCount: 2
+resources:
+  limits:
+    cpu: 100m
+    memory: 170Mi
+  requests:
+    cpu: 100m
+    memory: 70Mi

@@ -97,3 +97,22 @@ resource "helm_release" "cluster_autoscaler" {
   ]
 }
 
+### Install CoreDNS ###
+resource "helm_release" "coredns" {
+  name       = "coredns"
+  chart      = "coredns"
+  repository = "https://coredns.github.io/helm"
+  namespace  = "kube-system"
+  version    = "1.27.1" # Or latest stable
+
+  values = [
+    file("${path.module}/templates/coredns-values.yaml.tmpl")
+  ]
+
+  depends_on = [
+    helm_release.cilium,                 # Cilium is up
+    module.eks_bottlerocket.node_groups # Nodes are ready
+  ]
+}
+
+

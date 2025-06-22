@@ -9,12 +9,12 @@ module "eks_bottlerocket" {
   enable_cluster_creator_admin_permissions = true
 
   # EKS Addons
-  cluster_addons = {
-    coredns = {}
-    #     eks-pod-identity-agent = {}
-    #     kube-proxy             = {}
-    #     vpc-cni                = {}
-  }
+  # cluster_addons = {
+  #   coredns = {}
+  #   #     eks-pod-identity-agent = {}
+  #   #     kube-proxy             = {}
+  #   #     vpc-cni                = {}
+  # }
 
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
