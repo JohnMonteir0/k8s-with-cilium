@@ -1,5 +1,6 @@
 ### Install Cilium ENI Mode ###
 resource "helm_release" "cilium" {
+  count            = var.install_cilium ? 1 : 0
   name             = "cilium"
   repository       = "https://helm.cilium.io/"
   chart            = "cilium"
@@ -14,6 +15,7 @@ resource "helm_release" "cilium" {
 
 ### Install AWS ALB Controller ###
 resource "helm_release" "aws_load_balancer_controller" {
+  count      = var.install_cilium ? 1 : 0
   name       = "aws-load-balancer-controller"
   repository = "https://aws.github.io/eks-charts"
   chart      = "aws-load-balancer-controller"
@@ -30,13 +32,14 @@ resource "helm_release" "aws_load_balancer_controller" {
   ]
 
   depends_on = [
-    var.depends_on_modules,
+    helm_release.cilium,
     aws_iam_role_policy_attachment.attach_load_balancer_policy
   ]
 }
 
 ### Install Ingress NGINX Controller ###
 resource "helm_release" "ingress_nginx" {
+  count            = var.install_cilium ? 1 : 0
   name             = "ingress-nginx"
   repository       = "https://kubernetes.github.io/ingress-nginx"
   chart            = "ingress-nginx"
@@ -51,12 +54,14 @@ resource "helm_release" "ingress_nginx" {
   ]
 
   depends_on = [
+    helm_release.cilium,
     helm_release.aws_load_balancer_controller
   ]
 }
 
 ### Install EBS CSI Driver ###
 resource "helm_release" "ebs_csi_driver" {
+  count      = var.install_cilium ? 1 : 0
   name       = "aws-ebs-csi-driver"
   repository = "https://kubernetes-sigs.github.io/aws-ebs-csi-driver"
   chart      = "aws-ebs-csi-driver"
@@ -70,13 +75,14 @@ resource "helm_release" "ebs_csi_driver" {
   ]
 
   depends_on = [
-    var.depends_on_modules,
+    helm_release.cilium,
     aws_iam_role_policy_attachment.attach_ebs_csi_policy
   ]
 }
 
 ### Install Cluster Autoscaler ###
 resource "helm_release" "cluster_autoscaler" {
+  count      = var.install_cilium ? 1 : 0
   name       = "cluster-autoscaler"
   repository = "https://kubernetes.github.io/autoscaler"
   chart      = "cluster-autoscaler"
@@ -92,27 +98,25 @@ resource "helm_release" "cluster_autoscaler" {
   ]
 
   depends_on = [
-    var.depends_on_modules,
+    helm_release.cilium,
     aws_iam_role_policy_attachment.attach_cluster_autoscaler_policy
   ]
 }
 
 ### Install CoreDNS ###
 resource "helm_release" "coredns" {
+  count      = var.install_cilium ? 1 : 0
   name       = "coredns"
   chart      = "coredns"
   repository = "https://coredns.github.io/helm"
   namespace  = "kube-system"
-  version    = "1.27.1" # Or latest stable
+  version    = "1.27.1"
 
   values = [
     templatefile("${path.module}/templates/coredns-values.yaml.tmpl", {})
   ]
 
   depends_on = [
-    helm_release.cilium,
-    var.depends_on_modules
+    helm_release.cilium
   ]
 }
-
-
