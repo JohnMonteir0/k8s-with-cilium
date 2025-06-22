@@ -39,3 +39,9 @@ variable "depends_on_modules" {
   type        = list(any)
   default     = []
 }
+
+variable "install_cilium" {
+  description = "Whether to install Cilium and all dependent Helm charts"
+  type        = bool
+  default     = false
+}
