@@ -106,7 +106,7 @@ resource "helm_release" "coredns" {
   version    = "1.27.1" # Or latest stable
 
   values = [
-    templatefile("${path.module}/templates/coredns-values.yaml.tmpl")
+    templatefile("${path.module}/templates/coredns-values.yaml.tmpl", {})
   ]
 
   depends_on = [
