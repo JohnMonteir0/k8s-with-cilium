@@ -112,47 +112,48 @@ resource "aws_kms_key" "terraform_backend" {
     Version = "2012-10-17",
     Statement = [
       {
-        Sid: "AllowAdminAccess",
+        Sid: "AllowRootFullAccess",
         Effect: "Allow",
         Principal: {
-          AWS: "arn:aws:iam::851725188350:root"
+          AWS = "arn:aws:iam::851725188350:root"
         },
-        Action: "kms:*",
-        Resource: "*"
+        Action = "kms:*",
+        Resource = "*"
       },
       {
-        Sid: "AllowAllIAMUsersInAccountToUseKey",
-        Effect: "Allow",
-        Principal: "*",
-        Action: [
-          "kms:Encrypt",
+        Sid: "AllowGitHubActionsRole",
+        Effect = "Allow",
+        Principal: {
+          AWS = "arn:aws:iam::851725188350:role/gh-actions-role"
+        },
+        Action = [
           "kms:Decrypt",
-          "kms:ReEncrypt*",
-          "kms:GenerateDataKey*",
-          "kms:DescribeKey"
+          "kms:Encrypt",
+          "kms:DescribeKey",
+          "kms:GenerateDataKey*"
         ],
-        Resource: "*",
-        Condition: {
-          StringEquals: {
-            "kms:CallerAccount": "851725188350"
-          }
-        }
+        Resource = "*"
       },
       {
-        Sid: "AllowDynamoDBToUseKey",
-        Effect: "Allow",
-        Principal: {
-          Service: "dynamodb.amazonaws.com"
-        },
-        Action: [
+        Sid: "AllowDynamoDBWithViaService",
+        Effect = "Allow",
+        Principal: "*",
+        Action = [
           "kms:Decrypt",
           "kms:GenerateDataKey*"
         ],
-        Resource: "*"
+        Resource = "*",
+        Condition = {
+          StringEquals = {
+            "kms:CallerAccount" = "851725188350",
+            "kms:ViaService"    = "dynamodb.us-east-1.amazonaws.com"
+          }
+        }
       }
     ]
   })
 }
+
 
 
 
