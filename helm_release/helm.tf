@@ -106,12 +106,12 @@ resource "helm_release" "coredns" {
   version    = "1.27.1" # Or latest stable
 
   values = [
-    file("${path.module}/templates/coredns-values.yaml.tmpl")
+    templatefile("${path.module}/templates/coredns-values.yaml.tmpl")
   ]
 
   depends_on = [
-    helm_release.cilium,                 # Cilium is up
-    module.eks_bottlerocket.node_groups # Nodes are ready
+    helm_release.cilium,
+    var.depends_on_modules
   ]
 }
 
