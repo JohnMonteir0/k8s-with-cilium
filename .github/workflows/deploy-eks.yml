@@ -44,9 +44,9 @@ jobs:
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: |
           terraform apply -auto-approve \
-            -var="enable_node_groups=false" \
-            -var="enable_eks_addons=false" \
-            -var="install_cilium=false"
+            -var enable_node_groups=false \
+            -var enable_eks_addons=false \
+            -var install_cilium=false
 
       ######################################################
       # STEP 2 - Install Cilium (ENI mode)
@@ -55,9 +55,9 @@ jobs:
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: |
           terraform apply -auto-approve \
-            -var="enable_node_groups=false" \
-            -var="enable_eks_addons=false" \
-            -var="install_cilium=true"
+            -var enable_node_groups=false \
+            -var enable_eks_addons=false \
+            -var install_cilium=true
 
       ######################################################
       # STEP 3 - Add Node Groups
@@ -66,9 +66,9 @@ jobs:
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: |
           terraform apply -auto-approve \
-            -var="enable_node_groups=true" \
-            -var="enable_eks_addons=false" \
-            -var="install_cilium=true"
+            -var enable_node_groups=true \
+            -var enable_eks_addons=false \
+            -var install_cilium=true
 
       ######################################################
       # STEP 4 - Install EKS Add-ons + Other Helm Charts
@@ -77,6 +77,6 @@ jobs:
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: |
           terraform apply -auto-approve \
-            -var="enable_node_groups=true" \
-            -var="enable_eks_addons=true" \
-            -var="install_cilium=true"
+            -var enable_node_groups=true \
+            -var enable_eks_addons=true \
+            -var install_cilium=true

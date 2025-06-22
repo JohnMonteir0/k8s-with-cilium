@@ -9,3 +9,15 @@ variable "enable_node_groups" {
   type        = bool
   default     = true
 }
+
+variable "enable_eks_addons" {
+  description = "Controls whether EKS add-ons should be installed"
+  type        = bool
+  default     = false
+}
+
+variable "install_cilium" {
+  description = "Controls whether Cilium should be installed"
+  type        = bool
+  default     = false
+}
