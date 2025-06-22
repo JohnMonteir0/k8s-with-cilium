@@ -110,46 +110,44 @@ resource "aws_kms_key" "terraform_backend" {
 
   policy = jsonencode({
     Version = "2012-10-17",
-    Id      = "key-default-1",
     Statement = [
       {
-        Sid: "AllowRootAccountFullAccess",
-        Effect: "Allow",
-        Principal: {
-          AWS: "arn:aws:iam::851725188350:root"
+        Sid    = "AllowRootFullAccess",
+        Effect = "Allow",
+        Principal = {
+          AWS = "arn:aws:iam::851725188350:root"
         },
-        Action: "kms:*",
-        Resource: "*"
+        Action   = "kms:*",
+        Resource = "*"
       },
       {
-        Sid: "AllowGitHubActionsRoleAccess",
-        Effect: "Allow",
-        Principal: {
-          AWS: "arn:aws:iam::851725188350:role/gh-actions-role"
+        Sid    = "AllowGitHubActionsRoleAccess",
+        Effect = "Allow",
+        Principal = {
+          AWS = "arn:aws:iam::851725188350:role/gh-actions-role"
         },
-        Action: [
-          "kms:Encrypt",
+        Action = [
           "kms:Decrypt",
-          "kms:ReEncrypt*",
-          "kms:GenerateDataKey*",
-          "kms:DescribeKey"
+          "kms:Encrypt",
+          "kms:DescribeKey",
+          "kms:GenerateDataKey*"
         ],
-        Resource: "*"
+        Resource = "*",
+        Condition = {
+          StringLikeIfExists = {
+            "aws:userid" : "AROA*:*"  # covers assumed role sessions
+          }
+        }
       },
       {
-        Sid: "AllowDynamoDBToUseKey",
-        Effect: "Allow",
-        Principal: {
-          Service: "dynamodb.amazonaws.com"
-        },
-        Action: [
-          "kms:Encrypt",
+        Sid       = "AllowDynamoDBServiceUsage",
+        Effect    = "Allow",
+        Principal = "*",
+        Action = [
           "kms:Decrypt",
-          "kms:ReEncrypt*",
-          "kms:GenerateDataKey*",
-          "kms:DescribeKey"
+          "kms:GenerateDataKey*"
         ],
-        Resource: "*",
+        Resource = "*",
         Condition = {
           StringEquals = {
             "kms:CallerAccount" = "851725188350",
@@ -160,6 +158,8 @@ resource "aws_kms_key" "terraform_backend" {
     ]
   })
 }
+
+
 
 
 
