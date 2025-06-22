@@ -17,41 +17,66 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      ######################################################
-      # STEP 0 - Checkout source code
-      ######################################################
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      ######################################################
-      # STEP 1 - Authenticate to AWS using GitHub OIDC
-      ######################################################
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: ${{ secrets.GHA_ASSUME_ROLE_ARN }}
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/gh-actions-role
           aws-region: ${{ env.AWS_REGION }}
 
-      ######################################################
-      # STEP 2 - Configure Git for private module access
-      ######################################################
       - name: Configure Git credentials
         run: |
           git config --global url."https://${{ secrets.GH_TOKEN }}@github.com/".insteadOf "https://github.com/"
 
-      ######################################################
-      # STEP 3 - Install Terraform CLI
-      ######################################################
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      ######################################################
-      # STEP 4 - Initialize Terraform working directory
-      ######################################################
       - name: Terraform Init
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform init
 
       ######################################################
-      # STEP 5 - Create EKS Cluster (no node groups, no addons)
-      #####
+      # STEP 1 - Create EKS Cluster (no nodes, no addons)
+      ######################################################
+      - name: Terraform Apply - Cluster Only
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: |
+          terraform apply -auto-approve \
+            -var="enable_node_groups=false" \
+            -var="enable_eks_addons=false" \
+            -var="install_cilium=false"
+
+      ######################################################
+      # STEP 2 - Install Cilium (ENI mode)
+      ######################################################
+      - name: Terraform Apply - Install Cilium
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: |
+          terraform apply -auto-approve \
+            -var="enable_node_groups=false" \
+            -var="enable_eks_addons=false" \
+            -var="install_cilium=true"
+
+      ######################################################
+      # STEP 3 - Add Node Groups
+      ######################################################
+      - name: Terraform Apply - Add Node Groups
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: |
+          terraform apply -auto-approve \
+            -var="enable_node_groups=true" \
+            -var="enable_eks_addons=false" \
+            -var="install_cilium=true"
+
+      ######################################################
+      # STEP 4 - Install EKS Add-ons + Other Helm Charts
+      ######################################################
+      - name: Terraform Apply - Final Helm + Add-ons
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: |
+          terraform apply -auto-approve \
+            -var="enable_node_groups=true" \
+            -var="enable_eks_addons=true" \
+            -var="install_cilium=true"
