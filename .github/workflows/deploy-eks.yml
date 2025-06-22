@@ -23,8 +23,12 @@ jobs:
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: arn:aws:iam::339712763252:role/gh-actions-role
+          role-to-assume: arn:aws:iam::851725188350:role/gh-actions-role
           aws-region: ${{ env.AWS_REGION }}
+
+      - name: Configure Git credentials
+        run: |
+          git config --global url."https://${{ secrets.GH_TOKEN }}@github.com/".insteadOf "https://github.com/"
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3

@@ -13,6 +13,13 @@ terraform {
       version = ">= 5.0"
     }
   }
+
+  backend "s3" {
+    bucket         = "terraform-backend-terraformbackends3bucket-purx2gafrdxg"
+    key            = "backend"
+    region         = "us-east-1"
+    dynamodb_table = "terraform-backend-TerraformBackendDynamoDBTable-95EBUWJQAF6E"
+  }
 }
 
 provider "aws" {
