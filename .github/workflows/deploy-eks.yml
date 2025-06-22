@@ -30,27 +30,35 @@ jobs:
         uses: hashicorp/setup-terraform@v3
 
       ############################################
-      # Step 1: Apply EKS Cluster (no nodes)
+      # Step 1: Create EKS Cluster (no nodes/addons)
       ############################################
-      - name: Terraform Apply - EKS Cluster Only
+      - name: Terraform Apply - Cluster Only
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: |
           terraform apply -auto-approve \
-            -target=module.eks.cluster
+            -var="enable_node_groups=false" \
+            -var="enable_eks_addons=false" \
+            -var="install_cilium=false"
 
       ############################################
-      # Step 2: Apply Cilium + Node Groups
+      # Step 2: Create Node Groups + Cilium (ENI mode)
       ############################################
-      - name: Terraform Apply - Cilium + Node Groups
+      - name: Terraform Apply - Node Groups + Cilium
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: |
           terraform apply -auto-approve \
-            -target=module.eks.node_groups \
-            -target=helm_release.cilium
+            -var="enable_node_groups=true" \
+            -var="enable_eks_addons=false" \
+            -var="install_cilium=true"
 
       ############################################
-      # Step 3: Add-ons (CoreDNS, etc)
+      # Step 3: Add-ons (CoreDNS, EBS CSI, ALB, etc.)
       ############################################
-      - name: Terraform Apply - Add-ons
+      - name: Terraform Apply - Helm Add-ons
         working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform apply -auto-approve
+        run: |
+          terraform apply -auto-approve \
+            -var="enable_node_groups=true" \
+            -var="enable_eks_addons=true" \
+            -var="install_cilium=true"
+
