@@ -19,6 +19,7 @@ terraform {
     key            = "backend"
     region         = "us-east-1"
     dynamodb_table = "terraform-backend-TerraformBackendDynamoDBTable-95EBUWJQAF6E"
+    kms_key_id     = "arn:aws:kms:us-east-1:851725188350:key/mrk-786f521185fe4f85ae5afe72ce3bdb5b"
   }
 }
 
