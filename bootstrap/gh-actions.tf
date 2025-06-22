@@ -1,6 +1,6 @@
 variable "cluster_name" {
-  type        = string
-  default     = "cilium-cluster"
+  type    = string
+  default = "cilium-cluster"
 }
 
 variable "gh_repo" {
@@ -61,7 +61,7 @@ resource "aws_iam_role_policy_attachment" "iam_policy" {
   policy_arn = "arn:aws:iam::aws:policy/IAMFullAccess"
 }
 
-### Remote Backend Permission ###
+### Remote Backend Permissions ###
 resource "aws_iam_policy" "github_actions_tf_backend" {
   name = "github-actions-tf-backend-access"
 
@@ -103,11 +103,12 @@ resource "aws_iam_role_policy_attachment" "github_actions_tf_backend" {
   policy_arn = aws_iam_policy.github_actions_tf_backend.arn
 }
 
-### KMS Permission ###
+### KMS Key (inline policy only) ###
 resource "aws_kms_key" "terraform_backend" {
   description         = "KMS key for Terraform backend"
   enable_key_rotation = true
-  policy              = jsonencode({
+
+  policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
       {
@@ -137,8 +138,4 @@ resource "aws_kms_key" "terraform_backend" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "terraform_backend" {
-  role       = aws_iam_role.gh_actions_role.name
-  policy_arn = aws_iam_policy.terraform_backend.arn
-}
 
