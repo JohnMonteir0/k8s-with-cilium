@@ -78,8 +78,8 @@ resource "aws_iam_policy" "github_actions_tf_backend" {
           "s3:ListBucket"
         ]
         Resource = [
-          "arn:aws:s3:::terraform-backend-terraformbackends3bucket-purx2gafrdxg",
-          "arn:aws:s3:::terraform-backend-terraformbackends3bucket-purx2gafrdxg/*"
+          "arn:aws:s3:::terraform-backend-terraformbackends3bucket-cicagxwrw0p9",
+          "arn:aws:s3:::terraform-backend-terraformbackends3bucket-cicagxwrw0p9/*"
         ]
       },
       {
@@ -92,7 +92,7 @@ resource "aws_iam_policy" "github_actions_tf_backend" {
           "dynamodb:Scan",
           "dynamodb:UpdateItem"
         ]
-        Resource = "arn:aws:dynamodb:us-east-1:851725188350:table/terraform-backend-TerraformBackendDynamoDBTable-95EBUWJQAF6E"
+        Resource = "arn:aws:dynamodb:us-east-1:058264076061:table/terraform-backend-TerraformBackendDynamoDBTable-1MACMF7VC44EU"
       }
     ]
   })
@@ -115,7 +115,7 @@ resource "aws_kms_key" "terraform_backend" {
         Sid    = "AllowRootFullAccess",
         Effect = "Allow",
         Principal = {
-          AWS = "arn:aws:iam::851725188350:root"
+          AWS = "arn:aws:iam::058264076061:root"
         },
         Action   = "kms:*",
         Resource = "*"
@@ -124,7 +124,7 @@ resource "aws_kms_key" "terraform_backend" {
         Sid    = "AllowGitHubActionsRoleAccess",
         Effect = "Allow",
         Principal = {
-          AWS = "arn:aws:iam::851725188350:role/gh-actions-role"
+          AWS = "arn:aws:iam::058264076061:role/gh-actions-role"
         },
         Action = [
           "kms:Decrypt",
@@ -150,7 +150,7 @@ resource "aws_kms_key" "terraform_backend" {
         Resource = "*",
         Condition = {
           StringEquals = {
-            "kms:CallerAccount" = "851725188350",
+            "kms:CallerAccount" = "058264076061",
             "kms:ViaService"    = "dynamodb.us-east-1.amazonaws.com"
           }
         }
@@ -204,6 +204,41 @@ resource "aws_iam_policy" "github_actions_extra_permissions" {
 resource "aws_iam_role_policy_attachment" "github_actions_extra_permissions" {
   role       = aws_iam_role.gh_actions_role.name
   policy_arn = aws_iam_policy.github_actions_extra_permissions.arn
+}
+
+resource "aws_iam_role_policy_attachment" "eks_managed" {
+  role       = aws_iam_role.gh_actions_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+}
+
+resource "aws_iam_role_policy_attachment" "eks_worker_node" {
+  role       = aws_iam_role.gh_actions_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+}
+
+resource "aws_iam_role_policy_attachment" "eks_vpc" {
+  role       = aws_iam_role.gh_actions_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonVPCFullAccess"
+}
+
+resource "aws_iam_role_policy_attachment" "iam_full" {
+  role       = aws_iam_role.gh_actions_role.name
+  policy_arn = "arn:aws:iam::aws:policy/IAMFullAccess"
+}
+
+resource "aws_iam_role_policy_attachment" "kms" {
+  role       = aws_iam_role.gh_actions_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AWSKeyManagementServicePowerUser"
+}
+
+resource "aws_iam_role_policy_attachment" "s3_backend" {
+  role       = aws_iam_role.gh_actions_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+}
+
+resource "aws_iam_role_policy_attachment" "dynamodb_backend" {
+  role       = aws_iam_role.gh_actions_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
 }
 
 
