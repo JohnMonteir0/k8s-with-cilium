@@ -15,11 +15,10 @@ terraform {
   }
 
   backend "s3" {
-    bucket         = "terraform-backend-terraformbackends3bucket-purx2gafrdxg"
+    bucket         = "terraform-backend-terraformbackends3bucket-cicagxwrw0p9"
     key            = "backend"
     region         = "us-east-1"
-    dynamodb_table = "terraform-backend-TerraformBackendDynamoDBTable-95EBUWJQAF6E"
-    kms_key_id     = "arn:aws:kms:us-east-1:851725188350:key/mrk-786f521185fe4f85ae5afe72ce3bdb5b"
+    dynamodb_table = "terraform-backend-TerraformBackendDynamoDBTable-1MACMF7VC44EU"
   }
 }
 
