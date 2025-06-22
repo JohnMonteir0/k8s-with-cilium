@@ -61,3 +61,46 @@ resource "aws_iam_role_policy_attachment" "iam_policy" {
   policy_arn = "arn:aws:iam::aws:policy/IAMFullAccess"
 }
 
+### Remote Backend Permission ###
+resource "aws_iam_policy" "github_actions_tf_backend" {
+  name = "github-actions-tf-backend-access"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Sid    = "AllowS3TerraformBackendAccess"
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject",
+          "s3:ListBucket"
+        ]
+        Resource = [
+          "arn:aws:s3:::terraform-backend-terraformbackends3bucket-purx2gafrdxg",
+          "arn:aws:s3:::terraform-backend-terraformbackends3bucket-purx2gafrdxg/*"
+        ]
+      },
+      {
+        Sid    = "AllowDynamoDBTerraformLocking"
+        Effect = "Allow"
+        Action = [
+          "dynamodb:GetItem",
+          "dynamodb:PutItem",
+          "dynamodb:DeleteItem",
+          "dynamodb:Scan",
+          "dynamodb:UpdateItem"
+        ]
+        Resource = "arn:aws:dynamodb:us-east-1:851725188350:table/terraform-backend-TerraformBackendDynamoDBTable-95EBUWJQAF6E"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "github_actions_tf_backend" {
+  role       = aws_iam_role.gh_actions_role.name
+  policy_arn = aws_iam_policy.github_actions_tf_backend.arn
+}
+
+
