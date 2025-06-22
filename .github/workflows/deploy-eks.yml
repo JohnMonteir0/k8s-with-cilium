@@ -26,57 +26,31 @@ jobs:
           role-to-assume: ${{ secrets.GHA_ASSUME_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Configure Git credentials
-        run: |
-          git config --global url."https://${{ secrets.GH_TOKEN }}@github.com/".insteadOf "https://github.com/"
-
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      - name: Terraform Init
-        working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform init
-
-      ######################################################
-      # STEP 1 - Create EKS Cluster (no nodes, no addons)
-      ######################################################
-      - name: Terraform Apply - Cluster Only
+      ############################################
+      # Step 1: Apply EKS Cluster (no nodes)
+      ############################################
+      - name: Terraform Apply - EKS Cluster Only
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: |
           terraform apply -auto-approve \
-            -var enable_node_groups=false \
-            -var enable_eks_addons=false \
-            -var install_cilium=false
+            -target=module.eks.cluster
 
-      ######################################################
-      # STEP 2 - Install Cilium (ENI mode)
-      ######################################################
-      - name: Terraform Apply - Install Cilium
+      ############################################
+      # Step 2: Apply Cilium + Node Groups
+      ############################################
+      - name: Terraform Apply - Cilium + Node Groups
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: |
           terraform apply -auto-approve \
-            -var enable_node_groups=false \
-            -var enable_eks_addons=false \
-            -var install_cilium=true
+            -target=module.eks.node_groups \
+            -target=helm_release.cilium
 
-      ######################################################
-      # STEP 3 - Add Node Groups
-      ######################################################
-      - name: Terraform Apply - Add Node Groups
+      ############################################
+      # Step 3: Add-ons (CoreDNS, etc)
+      ############################################
+      - name: Terraform Apply - Add-ons
         working-directory: ${{ env.TF_WORKING_DIR }}
-        run: |
-          terraform apply -auto-approve \
-            -var enable_node_groups=true \
-            -var enable_eks_addons=false \
-            -var install_cilium=true
-
-      ######################################################
-      # STEP 4 - Install EKS Add-ons + Other Helm Charts
-      ######################################################
-      - name: Terraform Apply - Final Helm + Add-ons
-        working-directory: ${{ env.TF_WORKING_DIR }}
-        run: |
-          terraform apply -auto-approve \
-            -var enable_node_groups=true \
-            -var enable_eks_addons=true \
-            -var install_cilium=true
+        run: terraform apply -auto-approve
