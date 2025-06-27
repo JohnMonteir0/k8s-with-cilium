@@ -15,7 +15,7 @@ module "eks_bottlerocket" {
 
   access_entries = {
     github = {
-      principal_arn = "arn:aws:iam::381492274187:role/gh-actions-role"
+      principal_arn = "arn:aws:iam::992382635843:role/gh-actions-role"
       type          = "STANDARD"
 
       access_entry = {
