@@ -6,7 +6,7 @@ variable "cluster_name" {
 variable "gh_repo" {
   description = "GitHub repository in the format owner/repo"
   type        = string
-  default     = "JohnMonteir0/k8s-with-terraform"
+  default     = "JohnMonteir0/k8s-with-cilium"
 }
 
 data "tls_certificate" "gh_actions_tls" {
