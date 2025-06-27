@@ -21,8 +21,10 @@ module "eks_bottlerocket" {
       access_entry = {
         kubernetes_groups = ["system:masters"]
         username          = "cloud_user"
+        policy_arns       = ["arn:aws:iam::aws:policy/AmazonEKSClusterAdminPolicy"]
       }
     }
   }
 }
+
 
