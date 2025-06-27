@@ -1,0 +1,50 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Terraform Backend without custom KMS
+
+Resources: 
+  TerraformBackends3Bucket:
+    Type: AWS::S3::Bucket
+    Properties: 
+      AccessControl: Private
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: 'AES256'
+            BucketKeyEnabled: true
+      VersioningConfiguration: 
+        Status: Enabled
+      Tags:
+        - Key: Project
+          Value: Terraform
+
+  TerraformBackendDynamoDBTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: LockID
+          AttributeType: S
+      KeySchema:
+        - AttributeName: LockID
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      SSESpecification:
+        SSEEnabled: true
+      Tags:
+        - Key: Project
+          Value: Terraform
+
+Outputs:
+  S3Bucket:
+    Description: The Terraform Backend S3 Bucket
+    Value: !Ref TerraformBackends3Bucket
+
+  DynamoDBTable:
+    Description: The Terraform Backend DynamoDB Table for handling locking
+    Value: !Ref TerraformBackendDynamoDBTable

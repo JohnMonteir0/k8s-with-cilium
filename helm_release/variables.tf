@@ -45,3 +45,9 @@ variable "install_cilium" {
   type        = bool
   default     = false
 }
+
+variable "enable_eks_addons" {
+  description = "Whether to install EKS Add-ons"
+  type        = bool
+  default     = false
+}
