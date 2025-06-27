@@ -13,15 +13,4 @@ module "eks_bottlerocket" {
 
   eks_managed_node_groups = local.eks_node_groups
 
-  access_entries = {
-    github = {
-      principal_arn = "arn:aws:iam::992382635843:role/gh-actions-role"
-      type          = "STANDARD"
-
-      access_entry = {
-        kubernetes_groups = ["system:masters"]
-        username          = "github:{{SessionName}}"
-      }
-    }
-  }
 }
