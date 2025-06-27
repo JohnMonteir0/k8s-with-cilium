@@ -4,21 +4,24 @@ module "eks_bottlerocket" {
   cluster_name    = local.name
   cluster_version = "1.31"
 
-  create_cloudwatch_log_group              = false
-  cluster_endpoint_public_access           = true
+  create_cloudwatch_log_group    = false
+  cluster_endpoint_public_access = true
   enable_cluster_creator_admin_permissions = true
-
-  # EKS Addons
-  # cluster_addons = {
-  #   coredns = {}
-  #   #     eks-pod-identity-agent = {}
-  #   #     kube-proxy             = {}
-  #   #     vpc-cni                = {}
-  # }
 
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
 
- eks_managed_node_groups = local.eks_node_groups
- 
+  eks_managed_node_groups = local.eks_node_groups
+
+  access_entries = {
+    github = {
+      principal_arn = "arn:aws:iam::381492274187:role/gh-actions-role"
+      type          = "STANDARD"
+
+      access_entry = {
+        kubernetes_groups = ["system:masters"]
+        username          = "github:{{SessionName}}"
+      }
+    }
+  }
 }
