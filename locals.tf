@@ -14,7 +14,7 @@ locals {
 
 locals {
   eks_node_groups = var.enable_node_groups ? {
-    cilium-cluster = {
+    cilium-node-group = {
       ami_type       = "BOTTLEROCKET_x86_64"
       instance_types = ["t3.medium"]
 
