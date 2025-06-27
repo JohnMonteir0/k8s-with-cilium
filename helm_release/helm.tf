@@ -1,4 +1,3 @@
-### Install Cilium ENI Mode ###
 resource "helm_release" "cilium" {
   count            = var.install_cilium ? 1 : 0
   name             = "cilium"
@@ -13,9 +12,8 @@ resource "helm_release" "cilium" {
   })]
 }
 
-### Install AWS ALB Controller ###
 resource "helm_release" "aws_load_balancer_controller" {
-  count      = var.enable_eks_addons ? 1 : 0
+  count = var.install_cilium && var.enable_eks_addons ? 1 : 0
   name       = "aws-load-balancer-controller"
   repository = "https://aws.github.io/eks-charts"
   chart      = "aws-load-balancer-controller"
@@ -27,7 +25,7 @@ resource "helm_release" "aws_load_balancer_controller" {
       cluster_name = var.cluster_name
       region       = data.aws_region.current.name
       vpc_id       = var.vpc_id
-      role_arn     = aws_iam_role.eks_load_balancer_controller.arn
+      role_arn     = aws_iam_role.eks_load_balancer_controller[0].arn
     })
   ]
 
@@ -37,9 +35,8 @@ resource "helm_release" "aws_load_balancer_controller" {
   ]
 }
 
-### Install Ingress NGINX Controller ###
 resource "helm_release" "ingress_nginx" {
-  count            = var.enable_eks_addons ? 1 : 0
+  count = var.install_cilium && var.enable_eks_addons ? 1 : 0
   name             = "ingress-nginx"
   repository       = "https://kubernetes.github.io/ingress-nginx"
   chart            = "ingress-nginx"
@@ -59,9 +56,8 @@ resource "helm_release" "ingress_nginx" {
   ]
 }
 
-### Install EBS CSI Driver ###
 resource "helm_release" "ebs_csi_driver" {
-  count      = var.enable_eks_addons ? 1 : 0
+  count = var.install_cilium && var.enable_eks_addons ? 1 : 0
   name       = "aws-ebs-csi-driver"
   repository = "https://kubernetes-sigs.github.io/aws-ebs-csi-driver"
   chart      = "aws-ebs-csi-driver"
@@ -70,7 +66,7 @@ resource "helm_release" "ebs_csi_driver" {
 
   values = [
     templatefile("${path.module}/templates/ebs-csi-driver-values.yaml.tmpl", {
-      role_arn = aws_iam_role.eks_ebs_csi_controller.arn
+      role_arn = aws_iam_role.eks_ebs_csi_controller[0].arn
     })
   ]
 
@@ -80,9 +76,8 @@ resource "helm_release" "ebs_csi_driver" {
   ]
 }
 
-### Install Cluster Autoscaler ###
 resource "helm_release" "cluster_autoscaler" {
-  count      = var.enable_eks_addons ? 1 : 0
+  count = var.install_cilium && var.enable_eks_addons ? 1 : 0
   name       = "cluster-autoscaler"
   repository = "https://kubernetes.github.io/autoscaler"
   chart      = "cluster-autoscaler"
@@ -93,7 +88,7 @@ resource "helm_release" "cluster_autoscaler" {
     templatefile("${path.module}/templates/cluster-autoscaler-values.yaml.tmpl", {
       cluster_name = var.cluster_name
       region       = var.aws_region
-      role_arn     = aws_iam_role.eks_cluster_autoscaler.arn
+      role_arn     = aws_iam_role.eks_cluster_autoscaler[0].arn
     })
   ]
 
@@ -103,9 +98,8 @@ resource "helm_release" "cluster_autoscaler" {
   ]
 }
 
-### Install CoreDNS ###
 resource "helm_release" "coredns" {
-  count      = var.enable_eks_addons ? 1 : 0
+  count = var.install_cilium && var.enable_eks_addons ? 1 : 0
   name       = "coredns"
   chart      = "coredns"
   repository = "https://coredns.github.io/helm"
