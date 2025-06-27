@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Configure AWS credentials (OIDC)
@@ -29,14 +29,14 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      - name: Terraform Init (reconfigure backend)
+      - name: Terraform Init (Reconfigure Backend)
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform init -reconfigure
 
-      ############################################
-      # Step 1: Create EKS Cluster (no nodes/addons)
-      ############################################
-      - name: Terraform Apply - Cluster Only
+      ################################################
+      # Step 1 - Bootstrap Cluster Only (no nodes/addons)
+      ################################################
+      - name: Terraform Apply - EKS Cluster Only
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: |
           terraform apply -auto-approve \
@@ -44,9 +44,9 @@ jobs:
             -var="enable_eks_addons=false" \
             -var="install_cilium=false"
 
-      ############################################
-      # Step 2: Create Node Groups + Cilium (ENI mode)
-      ############################################
+      ################################################
+      # Step 2 - Create Node Groups + Cilium
+      ################################################
       - name: Terraform Apply - Node Groups + Cilium
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: |
@@ -55,10 +55,10 @@ jobs:
             -var="enable_eks_addons=false" \
             -var="install_cilium=true"
 
-      ############################################
-      # Step 3: Add-ons (CoreDNS, EBS CSI, ALB, etc.)
-      ############################################
-      - name: Terraform Apply - Helm Add-ons
+      ################################################
+      # Step 3 - Deploy Helm Add-ons (requires Cilium)
+      ################################################
+      - name: Terraform Apply - Helm Add-ons (EBS, ALB, NGINX, CoreDNS, Autoscaler)
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: |
           terraform apply -auto-approve \
