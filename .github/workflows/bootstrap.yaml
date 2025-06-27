@@ -1,0 +1,35 @@
+name: Bootstrap GitHub OIDC Role
+
+on:
+  workflow_dispatch:
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    environment: bootstrap-approved  # This triggers the manual approval
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Configure AWS credentials (Access Key)
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Terraform Init
+        working-directory: ./bootstrap
+        run: terraform init
+
+      - name: Terraform Apply
+        working-directory: ./bootstrap
+        run: terraform apply -auto-approve
+
+      - name: Output gh_actions_role_arn
+        working-directory: ./bootstrap
+        run: terraform output gh_actions_role_arn

@@ -1,8 +1,10 @@
 name: Deploy EKS with Cilium ENI Mode
 
 on:
-  push:
-    branches: [main]
+  workflow_run:
+    workflows: ["Bootstrap GitHub OIDC Role"]
+    types:
+      - completed
 
 env:
   TF_WORKING_DIR: .
@@ -14,6 +16,7 @@ permissions:
 
 jobs:
   deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
 
     steps:
