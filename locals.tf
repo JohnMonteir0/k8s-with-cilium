@@ -18,6 +18,8 @@ locals {
       ami_type       = "BOTTLEROCKET_x86_64"
       instance_types = ["t3.medium"]
 
+      private_networking = true
+
       min_size     = 2
       max_size     = 5
       desired_size = 2
@@ -33,5 +35,13 @@ locals {
         lockdown = "integrity"
       EOT
     }
+  } : {}
+}
+
+
+### CoreDNS Install
+locals {
+  cluster_addons = var.install_coredns ? {
+    coredns = {}
   } : {}
 }

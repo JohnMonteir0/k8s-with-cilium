@@ -11,13 +11,8 @@ module "eks_bottlerocket" {
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
 
-  # EKS Addons
-  # cluster_addons = {
-  #   coredns                = {}
-  #   eks-pod-identity-agent = {}
-  #   kube-proxy             = {}
-  #   vpc-cni                = {}
-  # }
+  # EKS Addons  
+  cluster_addons = local.cluster_addons
 
   eks_managed_node_groups = local.eks_node_groups
 
