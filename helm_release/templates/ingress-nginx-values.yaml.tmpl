@@ -1,3 +1,7 @@
 controller:
   service:
-    annotations: ${annotations}
+    annotations:
+%{ for k, v in annotations ~}
+      ${k}: ${v}
+%{ endfor ~}
+

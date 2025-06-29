@@ -45,10 +45,15 @@ resource "helm_release" "ingress_nginx" {
   create_namespace = true
 
   values = [
-    templatefile("${path.module}/templates/ingress-nginx-values.yaml.tmpl", {
-      annotations = yamlencode(local.annotations)
-    })
-  ]
+  templatefile("${path.module}/templates/ingress-nginx-values.yaml.tmpl", {
+    annotations = local.annotations
+  })
+]
+
+  timeout     = 900              # Increase time
+  wait        = true             # Wait until resources are ready
+  atomic      = true             # Roll back on failure
+  recreate_pods = true
 
   depends_on = [
     helm_release.cilium,

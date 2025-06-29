@@ -13,5 +13,8 @@ module "helm" {
   vpc_id                             = module.vpc.vpc_id
   k8s_service_host                   = replace(module.eks_bottlerocket.cluster_endpoint, "https://", "")
 
+  install_cilium    = var.install_cilium
+  enable_eks_addons = var.enable_eks_addons
+
   depends_on_modules = [module.eks_bottlerocket]
 }

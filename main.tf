@@ -11,20 +11,28 @@ module "eks_bottlerocket" {
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
 
+  # EKS Addons
+  # cluster_addons = {
+  #   coredns                = {}
+  #   eks-pod-identity-agent = {}
+  #   kube-proxy             = {}
+  #   vpc-cni                = {}
+  # }
+
   eks_managed_node_groups = local.eks_node_groups
 
-  access_entries = {
-    cloud_user = {
-      principal_arn = "arn:aws:iam::992382635843:user/cloud_user"
-      type          = "STANDARD"
+  #   access_entries = {
+  #     cloud_user = {
+  #       principal_arn = "arn:aws:iam::992382635843:user/cloud_user"
+  #       type          = "STANDARD"
 
-      access_entry = {
-        kubernetes_groups = ["system:masters"]
-        username          = "cloud_user"
-        policy_arns       = ["arn:aws:iam::aws:policy/AmazonEKSClusterAdminPolicy"]
-      }
-    }
-  }
+  #       access_entry = {
+  #         kubernetes_groups = ["system:masters"]
+  #         username          = "cloud_user"
+  #         policy_arns       = ["arn:aws:iam::aws:policy/AmazonEKSClusterAdminPolicy"]
+  #       }
+  #     }
+  #   }
 }
 
 
