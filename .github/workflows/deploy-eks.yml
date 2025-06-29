@@ -44,23 +44,25 @@ jobs:
             -var="install_cilium=false"
 
       ################################################
-      # Step 2 - Create Node Groups + Cilium
+      # Step 2 - Create Node Groups + Cilium + CoreDNS
       ################################################
-      - name: Terraform Apply - Node Groups + Cilium
+      - name: Terraform Apply - Node Groups + Cilium + CoreDNS
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: |
           terraform apply -auto-approve \
             -var="enable_node_groups=true" \
             -var="enable_eks_addons=false" \
-            -var="install_cilium=true"
+            -var="install_cilium=true" \
+            -var="install_coredns=true"
 
       ################################################
       # Step 3 - Deploy Helm Add-ons (requires Cilium)
       ################################################
-      - name: Terraform Apply - Helm Add-ons (EBS, ALB, NGINX, CoreDNS, Autoscaler)
+      - name: Terraform Apply - Helm Add-ons (EBS, ALB, NGINX, Autoscaler)
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: |
           terraform apply -auto-approve \
             -var="enable_node_groups=true" \
             -var="enable_eks_addons=true" \
-            -var="install_cilium=true"
+            -var="install_cilium=true" \
+            -var="install_coredns=true"

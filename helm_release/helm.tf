@@ -102,20 +102,3 @@ resource "helm_release" "cluster_autoscaler" {
     aws_iam_role_policy_attachment.attach_cluster_autoscaler_policy
   ]
 }
-
-resource "helm_release" "coredns" {
-  count      = var.install_cilium && var.enable_eks_addons ? 1 : 0
-  name       = "coredns"
-  chart      = "coredns"
-  repository = "https://coredns.github.io/helm"
-  namespace  = "kube-system"
-  version    = "1.27.1"
-
-  values = [
-    templatefile("${path.module}/templates/coredns-values.yaml.tmpl", {})
-  ]
-
-  depends_on = [
-    helm_release.cilium
-  ]
-}

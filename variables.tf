@@ -21,3 +21,9 @@ variable "install_cilium" {
   type        = bool
   default     = false
 }
+
+variable "install_coredns" {
+  description = "Controls whether CoreDNS should be installed"
+  type        = bool
+  default     = false
+}
